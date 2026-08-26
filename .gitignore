@@ -1,0 +1,7 @@
+_decompile/
+.DS_Store
+Thumbs.db
+*.log
+.agents/
+skills-lock.json
+.cursor/

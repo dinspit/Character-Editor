@@ -1,0 +1,13 @@
+{
+  "exiled": [
+    { "id": "700", "name": "ПНВ" }
+  ],
+  "capi": [
+    { "id": "Taser", "name": "Taser" },
+    { "id": "Cuffs049", "name": "Cuffs049" },
+    { "id": "Cage173", "name": "Cage173" },
+    { "id": "Bag096", "name": "Bag096" },
+    { "id": "Tranq", "name": "Tranq" },
+    { "id": "GuardBaton", "name": "GuardBaton" }
+  ]
+}

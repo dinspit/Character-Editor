@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "id": "examples",
+      "name": "Примеры",
+      "items": [
+        {
+          "id": "mogovets",
+          "name": "Моговец",
+          "payload": {
+            "role": "NtfSpecialist",
+            "useNick": true,
+            "nick": "Foltler",
+            "useCinfo": true,
+            "cinfo": "<color=#50C878><size=10><b>Моговец в спецовке</b></size></color>",
+            "useHp": true,
+            "hp": 100,
+            "items": [
+              { "source": "auto", "value": "Coin" },
+              { "source": "auto", "value": "Flashlight" }
+            ],
+            "ammo": { "Nato9": 264, "Nato556": 0, "Nato762": 0, "Ammo12Gauge": 0, "Ammo44Cal": 0 },
+            "mask": 5
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Character Editor by Dinspit &lt;3</title>
+  <link rel="icon" href="./favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.2/src/regular/style.css" />
+  <link rel="stylesheet" href="./css/app.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="side-tabs">
+        <button type="button" class="on" data-tpl-tab="server">Сервер</button>
+        <button type="button" data-tpl-tab="local">Мои</button>
+      </div>
+      <div class="side-actions" id="localActions" hidden>
+        <button class="btn btn-sm" id="btnSaveTpl" type="button">Сохранить</button>
+        <button class="btn btn-sm" id="btnNewFolder" type="button">Папка</button>
+        <button class="btn btn-sm" id="btnExportTpl" type="button">Экспорт</button>
+        <button class="btn btn-sm" id="btnImportTpl" type="button">Импорт</button>
+      </div>
+      <div class="tpl-tree" id="tplTree"></div>
+      <p class="empty-side" id="tplHint">Серверные шаблоны задаются в templates/server.json</p>
+    </aside>
+
+    <main class="workspace">
+      <aside class="preview-col">
+        <section class="card preview-card">
+          <div class="preview-art" id="previewArt">
+            <img id="roleImg" alt="" />
+            <div class="art-fallback" id="roleFallback">?</div>
+            <div class="preview-empty" id="previewEmpty">Роль не выбрана</div>
+            <div class="nameplate" id="nameplate"></div>
+          </div>
+          <div class="preview-body">
+            <div class="hp-row"><span>HP</span><span id="hpLabel">100</span></div>
+            <div class="hp-bar"><span id="hpFill"></span></div>
+            <div class="inv-mini" id="invMini"></div>
+          </div>
+        </section>
+      </aside>
+
+      <div class="stack">
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-crosshair" aria-hidden="true"></i>
+              <h2>Цель и роль</h2>
+              <button class="info" type="button" data-tip="ID, ник или SteamID. Несколько через Enter. * — все. Роль ставится на месте.">?</button>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="chips" id="targetChips"></div>
+            <div class="row">
+              <input class="input" id="targetInput" placeholder="ID, ник, SteamID, * — все" />
+              <button class="btn btn-icon" id="btnAll" type="button" title="Все игроки">*</button>
+            </div>
+            <div class="role-current" id="roleBtn" role="button" tabindex="0">
+              <img id="roleThumb" alt="" />
+              <div>
+                <b id="roleName">Не менять роль</b>
+                <small id="roleId">None</small>
+              </div>
+              <span class="hint">Выбрать</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-identification-badge" aria-hidden="true"></i>
+              <h2>Личность</h2>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="line">
+              <div class="label-row">
+                <i class="ph ph-user" aria-hidden="true"></i>
+                <b>Ник</b>
+                <button class="info" type="button" data-tip="Выкл — ник скрыт на неймплейте. Вкл и пустое поле — оригинальный ник. Текст — подмена имени.">?</button>
+              </div>
+              <button class="switch" id="nickToggle" type="button" aria-pressed="false"></button>
+            </div>
+            <div class="reveal" id="nickReveal">
+              <div class="reveal-in">
+                <input class="input" id="nickInput" placeholder="Оригинальный никнейм" maxlength="64" />
+              </div>
+            </div>
+
+            <div class="line">
+              <div class="label-row">
+                <i class="ph ph-text-aa" aria-hidden="true"></i>
+                <b>Кастом-инфо</b>
+                <button class="info" type="button" data-tip="Текст над ником. Теги &lt;b&gt; &lt;i&gt; &lt;size&gt; &lt;color&gt;. Выкл — не показывается и поле очищается.">?</button>
+              </div>
+              <button class="switch" id="cinfoToggle" type="button" aria-pressed="false"></button>
+            </div>
+            <div class="reveal" id="cinfoReveal">
+              <div class="reveal-in">
+                <div class="cinfo-tools" id="cinfoBar">
+                  <div class="toolbar-btns">
+                    <button class="btn" type="button" data-wrap="b">Жирный</button>
+                    <button class="btn" type="button" data-wrap="i">Курсив</button>
+                    <button class="btn" type="button" data-size="1">Размер</button>
+                    <input class="input toolbar-size" id="cinfoSize" type="number" min="8" max="48" value="20" />
+                    <button class="btn" type="button" data-nl="1">Строка</button>
+                  </div>
+                  <div class="swatches" id="swatches"></div>
+                </div>
+                <textarea class="input" id="cinfoInput" placeholder="Текст над ником"></textarea>
+                <div class="counter" id="cinfoCount">0</div>
+              </div>
+            </div>
+
+            <div class="line">
+              <div class="label-row">
+                <i class="ph ph-info" aria-hidden="true"></i>
+                <b>Информация об игроке</b>
+                <button class="info" type="button" data-tip="Роль под ником (Персонал Класса D, МОГ и т.д.). Выкл, то роль скрыта в InfoArea.">?</button>
+              </div>
+              <button class="switch" id="roleInfoToggle" type="button" aria-pressed="true"></button>
+            </div>
+
+            <div class="line">
+              <div class="label-row">
+                <i class="ph ph-medal" aria-hidden="true"></i>
+                <b>Бейдж</b>
+                <button class="info" type="button" data-tip="Цветной тэг (кастомный префикс, префикс админа и т.п).">?</button>
+              </div>
+              <button class="switch" id="badgeToggle" type="button" aria-pressed="false"></button>
+            </div>
+            <div class="line">
+              <div class="label-row">
+                <i class="ph ph-users-three" aria-hidden="true"></i>
+                <b>Отряд</b>
+                <button class="info" type="button" data-tip="Отряд МОГ/СБ (Uniform-11 и прочее)">?</button>
+              </div>
+              <button class="switch" id="unitToggle" type="button" aria-pressed="false"></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-heart" aria-hidden="true"></i>
+              <h2>HP</h2>
+              <button class="info" type="button" data-tip="Выкл — здоровье не меняется (по умолчанию 100). Вкл — ставит текущее ХП и максимум.">?</button>
+            </div>
+            <button class="switch" id="hpToggle" type="button" aria-pressed="false"></button>
+          </div>
+          <div class="card-b">
+            <div class="reveal" id="hpReveal">
+              <div class="reveal-in">
+                <div class="slider-row">
+                  <input type="range" id="hpRange" min="1" max="65535" value="100" />
+                  <input class="input" id="hpInput" type="number" min="1" max="65535" value="100" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-backpack" aria-hidden="true"></i>
+              <h2>Инвентарь</h2>
+              <button class="info" type="button" data-tip="Перед выдачей слоты всегда очищаются. vanilla: exiled: capi: задают источник предмета.">?</button>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="inv-grid" id="invGrid"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-puzzle-piece" aria-hidden="true"></i>
+              <h2>Кастомные предметы</h2>
+              <button class="info" type="button" data-tip="Exiled CustomItems и CustomItemsAPI.">?</button>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="filters" id="customSrcPills">
+              <button class="pill on" type="button" data-csrc="exiled">Exiled</button>
+              <button class="pill" type="button" data-csrc="capi">CAPI</button>
+            </div>
+            <div class="row">
+              <input class="input" id="customName" placeholder="ID или имя, например 123 или Taser. В Exiled - только ID, в CAPI - только названия." />
+              <button class="btn" id="btnAddCustomList" type="button">В список</button>
+              <button class="btn" id="btnAddCustom" type="button">В слот</button>
+            </div>
+            <div class="custom-grid" id="customGrid"></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-h">
+            <div class="label-row">
+              <i class="ph ph-circles-three" aria-hidden="true"></i>
+              <h2>Патроны</h2>
+            </div>
+          </div>
+          <div class="card-b">
+            <div class="ammo-list" id="ammoList"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <footer class="dock">
+    <div class="dock-in">
+      <pre class="cmd" id="command">cc</pre>
+      <div class="dock-btns">
+        <button class="btn" id="btnImport" type="button">Команда</button>
+        <button class="btn" id="btnReset" type="button">Сброс</button>
+        <button class="btn btn-icon" id="btnHelp" type="button">?</button>
+        <button class="btn-copy" id="btnCopy" type="button">Копировать</button>
+      </div>
+    </div>
+  </footer>
+
+  <div class="overlay" id="roleModal">
+    <div class="modal">
+      <div class="modal-h">
+        <h3>Роль</h3>
+        <button class="icon-btn" data-close="roleModal" type="button">✕</button>
+      </div>
+      <div class="modal-b">
+        <input class="input" id="roleSearch" placeholder="Поиск" />
+        <div class="filters" id="roleFilters"></div>
+        <div class="role-grid" id="roleGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="itemModal">
+    <div class="modal">
+      <div class="modal-h">
+        <h3>Слот <span id="slotTitle">1</span></h3>
+        <button class="icon-btn" data-close="itemModal" type="button">✕</button>
+      </div>
+      <div class="modal-b">
+        <input class="input" id="itemSearch" placeholder="Поиск" />
+        <div class="filters" id="itemFilters"></div>
+        <div class="item-grid" id="itemGrid"></div>
+        <div class="custom-add">
+          <select class="select" id="customSrc">
+            <option value="auto">Авто</option>
+            <option value="vanilla">vanilla:</option>
+            <option value="exiled">exiled:</option>
+            <option value="capi">capi:</option>
+          </select>
+          <input class="input" id="customId" placeholder="Coin / 12 / имя" />
+          <button class="btn-primary btn" id="btnCustomItem" type="button">Добавить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="importModal">
+    <div class="modal narrow">
+      <div class="modal-h">
+        <h3>Вставить команду</h3>
+        <button class="icon-btn" data-close="importModal" type="button">✕</button>
+      </div>
+      <div class="modal-b">
+        <textarea class="input" id="importText" placeholder="cc 12 NtfSpecialist;..."></textarea>
+        <div class="modal-actions">
+          <button class="btn-primary btn" id="btnDoImport" type="button">Разобрать</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="saveModal">
+    <div class="modal narrow">
+      <div class="modal-h">
+        <h3>Сохранить шаблон</h3>
+        <button class="icon-btn" data-close="saveModal" type="button">✕</button>
+      </div>
+      <div class="modal-b">
+        <label class="field">
+          <span class="hint">Название</span>
+          <input class="input" id="saveName" placeholder="Специалист ДЛ" />
+        </label>
+        <label class="field">
+          <span class="hint">Папка</span>
+          <select class="select" id="saveFolder"></select>
+        </label>
+        <div class="modal-actions">
+          <button class="btn-primary btn" id="btnDoSave" type="button">Сохранить</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="helpModal">
+    <div class="modal narrow">
+      <div class="modal-h">
+        <h3>Команда</h3>
+        <button class="icon-btn" data-close="helpModal" type="button">✕</button>
+      </div>
+      <div class="modal-b help">
+        <pre>cc цели роль;инфо;ник;hp;предметы;патроны;маска</pre>
+        <p>Кастом-инфо — строка <b>над</b> ником. Информация об игроке — роль <b>под</b> ником (бит Role=8).</p>
+        <p>Ник выкл — скрыт. Ник вкл и пусто — настоящий ник. HP выкл — не меняется.</p>
+        <p>Маска: Nickname=1, Badge=2, CustomInfo=4, Role=8, UnitName=16, PowerStatus=32. Пустое 7-е поле — не трогать InfoArea.</p>
+        <p>Серверные шаблоны — <code>templates/server.json</code>. Локальные хранятся в браузере.</p>
+      </div>
+    </div>
+  </div>
+
+  <input id="importFile" type="file" accept="application/json" hidden />
+  <div class="toast" id="toast"></div>
+
+  <script src="./js/data.js"></script>
+  <script src="./js/command.js"></script>
+  <script src="./js/assets.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>
