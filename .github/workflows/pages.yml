@@ -22,6 +22,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Bust asset cache
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          sha = os.environ["GITHUB_SHA"][:7]
+          path = Path("index.html")
+          text = path.read_text(encoding="utf-8")
+          for asset in (
+              "./css/app.css",
+              "./js/data.js",
+              "./js/command.js",
+              "./js/assets.js",
+              "./js/app.js",
+          ):
+              text = text.replace(f'href="{asset}"', f'href="{asset}?v={sha}"')
+              text = text.replace(f'src="{asset}"', f'src="{asset}?v={sha}"')
+          path.write_text(text, encoding="utf-8")
+          PY
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
